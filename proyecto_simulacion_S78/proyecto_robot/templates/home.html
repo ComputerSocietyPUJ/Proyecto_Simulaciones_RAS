@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block titulo %}Inicio — Diagnóstico y Panel Central{% endblock %}
+
+{% block contenido %}
+<div class="page-header">
+    <h1 class="page-title">Centro de Control y Simulación</h1>
+    <p class="page-description">
+        Plataforma modular diseñada para operar el robot diferencial físico mediante Raspberry Pi
+        o en modo simulado para desarrollo web e investigación de cinemática y navegación.
+    </p>
+</div>
+
+<!-- Grid de Diagnóstico y Estado Rápido -->
+<div class="grid-3" style="margin-bottom: 1.5rem;">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">⚙️ Estado del Driver</span>
+            {% if simulado %}
+            <span class="status-pill simulado">Simulado</span>
+            {% else %}
+            <span class="status-pill real">Hardware OK</span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <div class="telemetry-row">
+                <span class="telemetry-label">Capa de Ejecución</span>
+                <span class="telemetry-value">{{ estado.hardware }}</span>
+            </div>
+            <div class="telemetry-row">
+                <span class="telemetry-label">Último Comando</span>
+                <span class="telemetry-value" style="text-transform: uppercase;">{{ estado.direccion }}</span>
+            </div>
+            <div class="telemetry-row">
+                <span class="telemetry-label">Velocidad</span>
+                <span class="telemetry-value">{{ (estado.velocidad * 100)|round|int }}%</span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <span>Detección automática de GPIO</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">🔌 Mapeo de Pines (GPIO)</span>
+            <span class="btn-sm btn-outline">BCM Pi</span>
+        </div>
+        <div class="card-body">
+            <div class="pin-grid">
+                <div class="pin-chip">
+                    <span class="pin-chip-name">Motor Izq +</span>
+                    <span class="pin-chip-val">GPIO 17</span>
+                </div>
+                <div class="pin-chip">
+                    <span class="pin-chip-name">Motor Izq -</span>
+                    <span class="pin-chip-val">GPIO 18</span>
+                </div>
+                <div class="pin-chip">
+                    <span class="pin-chip-name">Motor Der +</span>
+                    <span class="pin-chip-val">GPIO 22</span>
+                </div>
+                <div class="pin-chip">
+                    <span class="pin-chip-name">Motor Der -</span>
+                    <span class="pin-chip-val">GPIO 23</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <span>Configurable en robot_control.py</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">📡 Conectividad y Red</span>
+            <span class="status-pill real">Online</span>
+        </div>
+        <div class="card-body">
+            <div class="telemetry-row">
+                <span class="telemetry-label">Puerto de Servicio</span>
+                <span class="telemetry-value">:5000</span>
+            </div>
+            <div class="telemetry-row">
+                <span class="telemetry-label">Acceso Remoto</span>
+                <span class="telemetry-value">0.0.0.0 (LAN)</span>
+            </div>
+            <div class="telemetry-row">
+                <span class="telemetry-label">API REST</span>
+                <span class="telemetry-value">/api/mover, /api/estado</span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <span>Listo para celular o laptop</span>
+        </div>
+    </div>
+</div>
+
+<!-- Módulos Principales -->
+<div class="grid-2" style="margin-bottom: 2rem;">
+    <!-- Tarjeta Módulo Control -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">🕹️ Control Manual Teleoperado</h2>
+        </div>
+        <div class="card-body">
+            <p style="color: var(--text-secondary); margin-bottom: 1.25rem; font-size: 0.92rem;">
+                Comando en tiempo real con panel D-Pad ergonómico, atajos de teclado (WASD / Flechas),
+                control porcentual de velocidad (PWM) y consola de telemetría en vivo.
+            </p>
+            <a href="{{ url_for('control') }}" class="btn btn-primary" style="width: 100%;">
+                Abrir Tablero de Control
+            </a>
+        </div>
+    </div>
+
+    <!-- Tarjeta Módulo Simulación -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">🧪 Laboratorio de Simulaciones</h2>
+        </div>
+        <div class="card-body">
+            <p style="color: var(--text-secondary); margin-bottom: 1.25rem; font-size: 0.92rem;">
+                Lienzo interactivo en 2D con cinemática diferencial, navegación autónoma con rayos de sensores
+                LiDAR/ultrasonido y física de rebote elástico.
+            </p>
+            <a href="{{ url_for('simulaciones') }}" class="btn btn-secondary" style="width: 100%;">
+                Explorar Simulaciones
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Tarjeta de Extensibilidad y Arquitectura de Software -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">📐 Arquitectura y Principios de Diseño de Software</h2>
+        <span class="status-pill real">Extensible</span>
+    </div>
+    <div class="card-body">
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+            El proyecto fue estructurado para facilitar la incorporación de más elementos
+            (sensores, algoritmos de trayectoria, visión por computador, cámaras o nuevos actuadores) sin acoplar el código:
+        </p>
+        <div class="grid-3" style="gap: 1rem;">
+            <div style="background-color: var(--bg-surface-elevated); padding: 0.9rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <strong style="display: block; font-size: 0.88rem; margin-bottom: 0.25rem; color: var(--brand-primary);">1. Single Responsibility (SRP)</strong>
+                <p style="font-size: 0.8rem; color: var(--text-secondary);">
+                    <code>api.js</code> se encarga de la red, <code>control.js</code> de la interacción de usuario, y <code>simulacion.js</code> del renderizado matemático.
+                </p>
+            </div>
+            <div style="background-color: var(--bg-surface-elevated); padding: 0.9rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <strong style="display: block; font-size: 0.88rem; margin-bottom: 0.25rem; color: var(--brand-primary);">2. Open / Closed (OCP)</strong>
+                <p style="font-size: 0.8rem; color: var(--text-secondary);">
+                    Usa <code>SimulationRegistry.register('id', ...)</code> para añadir nuevas simulaciones en el front-end sin tocar el bucle principal.
+                </p>
+            </div>
+            <div style="background-color: var(--bg-surface-elevated); padding: 0.9rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <strong style="display: block; font-size: 0.88rem; margin-bottom: 0.25rem; color: var(--brand-primary);">3. Strategy & DIP</strong>
+                <p style="font-size: 0.8rem; color: var(--text-secondary);">
+                    En Python, <code>BaseRobotDriver</code> permite alternar entre <code>SimulatedRobotDriver</code> y <code>GpioRobotDriver</code> de forma transparente.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

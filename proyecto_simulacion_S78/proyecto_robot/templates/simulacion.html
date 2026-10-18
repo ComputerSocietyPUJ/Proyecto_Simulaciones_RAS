@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block titulo %}Simulaciones{% endblock %}
+
+{% block contenido %}
+<div class="page-header">
+    <h1 class="page-title">Laboratorio de Simulación Cinemática</h1>
+    <p class="page-description">
+        Entorno visual interactivo para ensayar trayectorias, cinemática diferencial y algoritmos de evasión
+        antes de ejecutarlos en el robot físico.
+    </p>
+</div>
+
+<!-- Barra de control de la simulación -->
+<div class="simulation-toolbar">
+    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+        <label for="simSelect" style="font-size: 0.88rem; font-weight: 600; color: var(--text-secondary);">
+            Escenario:
+        </label>
+        <select id="simSelect" class="select-control"></select>
+    </div>
+
+    <div style="display: flex; gap: 0.5rem;">
+        <button id="btnTogglePlay" class="btn btn-secondary btn-sm">Pausar</button>
+        <button id="btnResetSim" class="btn btn-outline btn-sm">Reiniciar</button>
+    </div>
+</div>
+
+<!-- Descripción del escenario activo -->
+<div style="margin: 0.75rem 0 1rem; font-size: 0.88rem; color: var(--text-secondary);" id="simDescription">
+    Cargando escenario de simulación...
+</div>
+
+<!-- Viewport del Canvas con HUD -->
+<div class="card" style="margin-bottom: 2rem;">
+    <div class="card-body" style="padding: 1rem; display: flex; justify-content: center;">
+        <div class="simulation-viewport">
+            <canvas id="lienzo" width="640" height="420"></canvas>
+
+            <!-- HUD de Telemetría sobre el Canvas -->
+            <div class="canvas-hud">
+                <div id="hudCoords">X: 0 | Y: 0</div>
+                <div id="hudVel">Vel: 0 px/s</div>
+                <div id="hudExtra"></div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <span>💡 En el modo de cinemática diferencial, puedes guiar al robot con las teclas <strong>WASD</strong> o las <strong>flechas</strong>.</span>
+    </div>
+</div>
+
+<!-- Sección de Extensibilidad: Cómo añadir nuevas simulaciones -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">🧩 ¿Cómo agregar una nueva simulación? (Principio Open/Closed)</span>
+        <span class="status-pill real">Extensible</span>
+    </div>
+    <div class="card-body">
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 0.85rem;">
+            Gracias al patrón <strong>Strategy & Registry</strong> implementado en <code>static/js/simulacion.js</code>,
+            puedes añadir cualquier nuevo modelo físico o simulación sin modificar el bucle de renderizado:
+        </p>
+        <pre style="background: #0b0f17; color: #e2e8f0; padding: 1rem; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.78rem; overflow-x: auto;">
+<code>// 1. Creas tu clase cumpliendo con el contrato (init, update, draw, reset)
+class MiNuevaSimulacion {
+    constructor() {
+        this.nombre = "Control de Trayectoria PID";
+        this.descripcion = "Seguimiento de línea o waypoints con controlador PID.";
+        this.reset();
+    }
+    reset() { /* Inicializar variables de estado */ }
+    update(dt, input, engine) { /* Física, ecuaciones diferenciales o sensores */ }
+    draw(ctx, engine) { /* Dibujar elementos en el canvas 2D */ }
+    getTelemetry() { return { x: 10, y: 20, velocidad: "40 px/s" }; }
+}
+
+// 2. La registras en el catálogo (aparecerá automáticamente en el selector)
+SimulationRegistry.register('pid_seguidor', {
+    name: 'Control de Trayectoria PID',
+    create: () => new MiNuevaSimulacion()
+});</code></pre>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/simulacion.js') }}"></script>
+{% endblock %}

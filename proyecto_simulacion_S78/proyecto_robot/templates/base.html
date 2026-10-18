@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}Robot Lab{% endblock %} — Sistema de Control y Simulación</title>
+    <!-- Minimalist Design System -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <a href="{{ url_for('home') }}" class="brand">
+                <div class="brand-icon">🤖</div>
+                <span>RobotLab<span style="color: var(--brand-primary); font-weight: 400;"> // Semanas 7-8</span></span>
+            </a>
+
+            <nav class="nav-links">
+                <a href="{{ url_for('home') }}" class="nav-link {% if request.path == '/' %}active{% endif %}">Inicio</a>
+                <a href="{{ url_for('control') }}" class="nav-link {% if request.path == '/control' %}active{% endif %}">Control Manual</a>
+                <a href="{{ url_for('simulaciones') }}" class="nav-link {% if request.path == '/simulaciones' %}active{% endif %}">Simulaciones</a>
+            </nav>
+
+            <div>
+                {% if simulado %}
+                <div class="status-pill simulado" title="Sin hardware GPIO conectado en esta máquina">
+                    <span class="status-dot"></span>
+                    <span>Modo Simulado</span>
+                </div>
+                {% else %}
+                <div class="status-pill real" title="Conectado a Raspberry Pi GPIO">
+                    <span class="status-dot"></span>
+                    <span>Raspberry Pi Real</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        {% block contenido %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div>
+                <strong>RobotLab</strong> — Arquitectura Modular basada en Principios SOLID y Separación de Responsabilidades.
+            </div>
+            <div>
+                Pines GPIO: Motores Izq (17, 18) | Motores Der (22, 23)
+            </div>
+        </div>
+    </footer>
+
+    <!-- Capa de Servicio API -->
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

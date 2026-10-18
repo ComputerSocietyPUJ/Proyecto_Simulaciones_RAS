@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block titulo %}Control Manual{% endblock %}
+
+{% block contenido %}
+<div class="page-header">
+    <h1 class="page-title">Tablero de Control Manual</h1>
+    <p class="page-description">
+        Envía comandos direccionales al robot con velocidad regulada mediante PWM o atajos de teclado.
+    </p>
+</div>
+
+{% if simulado %}
+<div class="notice-banner warning">
+    <div class="notice-icon">⚠️</div>
+    <div>
+        <strong>Modo Simulado Activo:</strong> No se detectó bus GPIO en esta máquina. Los comandos
+        se simulan en memoria y se registran en la consola de telemetría. Al correr en la Raspberry Pi conectada
+        a los motores, se conmuta automáticamente al driver físico sin alterar tu código.
+    </div>
+</div>
+{% endif %}
+
+<div class="grid-2">
+    <!-- Panel de Mando (D-Pad y Velocidad) -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">🕹️ Panel de Mando</span>
+            <span id="badgeModo" class="status-pill {% if simulado %}simulado{% else %}real{% endif %}">
+                {% if simulado %}Modo Simulado{% else %}Hardware Real{% endif %}
+            </span>
+        </div>
+
+        <div class="card-body">
+            <div class="control-deck">
+                <!-- D-Pad con SVG Icons -->
+                <div class="dpad-container">
+                    <div></div>
+                    <button class="dpad-btn" data-dir="adelante" title="Avanzar (W o Flecha Arriba)">
+                        <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                        <span>Adelante</span>
+                    </button>
+                    <div></div>
+
+                    <button class="dpad-btn" data-dir="izquierda" title="Girar Izquierda (A o Flecha Izquierda)">
+                        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <span>Izq</span>
+                    </button>
+
+                    <button class="dpad-btn btn-stop" data-dir="detener" title="Detener Motores (Espacio)">
+                        <svg viewBox="0 0 24 24" style="stroke: none; fill: currentColor;"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
+                        <span>Parar</span>
+                    </button>
+
+                    <button class="dpad-btn" data-dir="derecha" title="Girar Derecha (D o Flecha Derecha)">
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        <span>Der</span>
+                    </button>
+
+                    <div></div>
+                    <button class="dpad-btn" data-dir="atras" title="Retroceder (S o Flecha Abajo)">
+                        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <span>Atrás</span>
+                    </button>
+                    <div></div>
+                </div>
+
+                <!-- Slider de Velocidad PWM -->
+                <div class="speed-control">
+                    <div class="speed-header">
+                        <span>Potencia de Motores (PWM)</span>
+                        <strong id="velocidadValor">100%</strong>
+                    </div>
+                    <input type="range" id="velocidadSlider" class="speed-slider" min="20" max="100" value="100" step="5">
+                </div>
+
+                <!-- Atajos de teclado -->
+                <div class="keyboard-hints">
+                    <span>Atajos:</span>
+                    <span class="key-chip">W</span>
+                    <span class="key-chip">A</span>
+                    <span class="key-chip">S</span>
+                    <span class="key-chip">D</span>
+                    <span>o flechas. Parar con</span>
+                    <span class="key-chip">Espacio</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <span>Último estado: <strong id="estadoTexto" style="color: var(--text-primary);">DETENER</strong></span>
+            <button class="btn btn-outline btn-sm" onclick="window.robotApi.detener();">E-STOP</button>
+        </div>
+    </div>
+
+    <!-- Telemetría, Sensores y Consola en Vivo -->
+    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+        <!-- Widget de Sensores Extensible -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">📡 Telemetría y Sensores</span>
+                <span class="status-pill real">Live</span>
+            </div>
+            <div class="card-body">
+                <div class="telemetry-row">
+                    <span class="telemetry-label">Sensor Frontal (Ultrasonido/LiDAR)</span>
+                    <span id="sensorFrontal" class="telemetry-value">35.4 cm</span>
+                </div>
+                <div class="telemetry-row">
+                    <span class="telemetry-label">Sensor Izquierdo</span>
+                    <span id="sensorIzq" class="telemetry-value">52.1 cm</span>
+                </div>
+                <div class="telemetry-row">
+                    <span class="telemetry-label">Sensor Derecho</span>
+                    <span id="sensorDer" class="telemetry-value">48.0 cm</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consola de Comandos -->
+        <div class="card" style="flex: 1;">
+            <div class="card-header">
+                <span class="card-title">💻 Registro de Comandos</span>
+                <button id="btnClearLog" class="btn btn-outline btn-sm">Limpiar</button>
+            </div>
+            <div class="card-body" style="padding: 0.75rem;">
+                <div id="consoleLog" class="console-box"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/control.js') }}"></script>
+{% endblock %}
